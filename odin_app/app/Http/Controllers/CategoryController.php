@@ -63,7 +63,9 @@ class CategoryController extends Controller
      */
     public function edit(Category $category)
     {
-        //
+        $this->ensureOwnership($category);
+
+        return view('categories.edit', compact('category'));
     }
 
     /**
@@ -71,7 +73,16 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
-        //
+        $validated = $requested->validate([
+            'name' => ['required', 'string', 'max:200'],
+        ]);
+
+        $category->update([
+            'name' => $validated['name'],
+        ]);
+
+        return redirect()
+            ->route('categories.index')->with('success', 'updated succesfully');
     }
 
     /**
@@ -79,7 +90,11 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        //
+        $this->ensureOwnership($category-);
+
+        $category->destroy();
+
+        return redirect()->route('categories.index')->with('sucess', 'removed succesfully');
     }
 
     private function ensureOwnership(Category $category)
