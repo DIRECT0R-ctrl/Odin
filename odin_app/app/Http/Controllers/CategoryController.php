@@ -12,7 +12,15 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        //
+        $userId = auth()->id();
+
+        // 2) WHAT? -> fetch only his categories
+        $categories = Category::where('user_id', $userId)
+            ->orderBy('name')
+            ->get();
+
+
+        return view('categories.index', compact('categories'));
     }
 
     /**
@@ -20,7 +28,7 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        //
+        return view('categories.create');
     }
 
     /**
@@ -28,7 +36,18 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+        ]);
+
+        Category::create([
+            'name' => $validated['name'],
+            'user_id' => auth()->id(),
+        ]);
+
+        return redirect()
+            ->route('categories.index');
+            ->with('success', 'categorie cree .');
     }
 
     /**
@@ -36,7 +55,7 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        //
+
     }
 
     /**
@@ -61,5 +80,13 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         //
+    }
+
+    private function ensureOwnership(Category $category)
+    {
+        if ($category->user_id !== auth()->id())
+        {
+            abort(403);
+        }
     }
 }
