@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Models\Link;
+use Illuminate\Validation\rule;
 
 class LinkController extends Controller
 {
@@ -36,7 +37,25 @@ class LinkController extends Controller
      */
     public function store(Request $request)
     {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'url' => 'required|url|max:2048',
+            'category_id' => [
+                Rule::exists('categories', 'id')->where(function ($q)
+                {
+                    $q->where('user_id', auth()->id()) / => hd
+                )}, // hdshy ki3ni the category must be exist f database o dyal haad l user
+            ],
+        ]);
 
+        Link::create([
+            'title' => $validated['title'],
+            'url' => $validated['url'],
+            'category_id' => $validated['category_id'],
+            'user_id' => auth()->id(),
+        ]);
+
+        return redirect()->route('links.index')->with('success', 'link created succefully');
     }
 
     /**

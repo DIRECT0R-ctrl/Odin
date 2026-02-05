@@ -10,7 +10,9 @@ class Link extends Model
 {
     protected $fillable = [
         'title',
-        'url'
+        'url',
+        'user_id',
+        'category_id'
     ];
 
     public function category()
