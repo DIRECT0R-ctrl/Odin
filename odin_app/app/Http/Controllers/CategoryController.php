@@ -46,7 +46,7 @@ class CategoryController extends Controller
         ]);
 
         return redirect()
-            ->route('categories.index');
+            ->route('categories.index')
             ->with('success', 'categorie cree .');
     }
 
@@ -73,7 +73,7 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
-        $validated = $requested->validate([
+        $validated = $request->validate([
             'name' => ['required', 'string', 'max:200'],
         ]);
 
@@ -90,9 +90,9 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        $this->ensureOwnership($category-);
+        $this->ensureOwnership($category);
 
-        $category->destroy();
+        $category->delete();
 
         return redirect()->route('categories.index')->with('sucess', 'removed succesfully');
     }
