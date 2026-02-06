@@ -1,4 +1,13 @@
 <x-app-layout>
+
+    @if (session('success'))
+        <p style="color:green">{{ session('success')}}</p>
+    @endif
+
+    @if (session('error'))
+        <p style="color:red">{{ session('error')}}</p>
+    @endif
+
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             Links
@@ -29,6 +38,16 @@
                             <div class="text-sm text-gray-600">
                                 Category: {{ $link->category?->name ?? '—' }}
                             </div>
+
+                            <div class="text-sm text-gray-600 mt-1">
+                                Tags:
+                                @foreach ($link->tags as $tag)
+                                    <span class="inline-block bg-gray-200 px-2 py-1 text-xs rounded mr-1">
+                                        {{ $tag->name }}
+                                    </span>
+                                @endforeach
+                            </div>
+
 
                             <div class="text-sm mt-2">
                                 <a class="underline mr-3" href="{{ route('links.edit', $link) }}">Edit</a>
