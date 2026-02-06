@@ -33,6 +33,11 @@
         </select>
     </div>
 
+    <div>
+        <label>Tags (comma separated)</label><br>
+        <input type="text" name="tags" value="{{ old('tags') }}" placeholder="php, backend, laravel">
+    </div>
+
     <button type="submit">Save</button>
 </form>
 
