@@ -5,20 +5,42 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Models\Link;
-use Illuminate\Validation\rule;
+use App\Models\Tag;
+use Illuminate\Validation\Rule;
 
 class LinkController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $links = Link::where('user_id', auth()->id())
-            ->with('category')->latest()->get();
+        $query = Link::where('user_id', auth()->id())
+            ->with(['category', 'tags'])
+            ->latest();
 
-        return view('links.index', compact('links'));
+        if ($request->filled('q')) {
+            $q = $request->input('q');
+            $query->where('title', 'ilike', "%{$q}%"); // pgsql
+             // ila kant  mysql: ->where('title', 'like', "%{$q}%")
+        }
+
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->integer('category_id'));
+        }
+
+        if ($request->filled('tag')) {
+            $tag = mb_strtolower(trim($request->input('tag')));
+            $query->whereHas('tags', fn ($tq) => $tq->where('name', $tag));
+        }
+
+        $links = $query->get();
+
+        $categories = Category::where('user_id', auth()->id())->orderBy('name')->get();
+
+        return view('links.index', compact('links', 'categories'));
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -41,19 +63,38 @@ class LinkController extends Controller
             'title' => 'required|string|max:255',
             'url' => 'required|url|max:2048',
             'category_id' => [
+                'required',
+                'integer',
                 Rule::exists('categories', 'id')->where(function ($q)
                 {
-                    $q->where('user_id', auth()->id()) / => hd
-                )}, // hdshy ki3ni the category must be exist f database o dyal haad l user
+                    $q->where('user_id', auth()->id()); // => hd to lt7t
+                }), // hdshy ki3ni the category must be exist f database o dyal haad l user
             ],
+            'tags' => ['nullable', 'string', 'max:255']
         ]);
 
-        Link::create([
+        $link = Link::create([
             'title' => $validated['title'],
             'url' => $validated['url'],
             'category_id' => $validated['category_id'],
             'user_id' => auth()->id(),
         ]);
+
+        $raw = $validated['tags'] ?? '';
+        $names = collect(explode(',', $raw))
+            ->map(fn ($t) => trim($t))
+            ->filter() // remove empty
+            ->map(fn ($t) => mb_strtolower($t))
+            ->unique()
+            ->values();
+
+        if ($names->isNotEmpty()) {
+            $tagIds = $names->map(function ($name) {
+            return Tag::firstOrCreate(['name' => $name])->id;
+        });
+
+            $link->tags()->sync($tagIds->all());
+        }
 
         return redirect()->route('links.index')->with('success', 'link created succefully');
     }
@@ -71,7 +112,7 @@ class LinkController extends Controller
      */
     public function edit(string $id)
     {
-        //
+
     }
 
     /**
