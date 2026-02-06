@@ -7,6 +7,9 @@ use App\Models\Link;
 
 class Tag extends Model
 {
+    protected $fillable = [
+        'name'
+    ];
     public function links()
     {
         return $this->belongsToMany(Link::class);
