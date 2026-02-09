@@ -55,4 +55,19 @@ class User extends Authenticatable
     {
         return $this->hasMany(Link::class);
     }
+
+    public function roles()
+    {
+        return $this->belongsToMany(\App\Models\Roles::class);
+    }
+
+    public function hasRole(strin $Role)
+    {
+        return $this->roles()->where('name', $role)->exists();
+    }
+
+    public function isAdmin()
+    {
+        return $this->hasRole('admin');
+    }
 }
