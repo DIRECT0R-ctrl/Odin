@@ -1,5 +1,13 @@
 <x-app-layout>
 
+@if (session('success'))
+    <p style="color:green">{{ session('success') }}</p>
+@endif
+
+@if (session('error'))
+    <p style="color:red">{{ session('error') }}</p>
+@endif
+
 <h2class="text-xl mb-4">mes categories</h2>
 
 @if(session('success'))
